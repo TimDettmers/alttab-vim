@@ -110,14 +110,14 @@ def win_size(wid, x=None, y=None):
 		xdo('windowsize %s %s %s' % (wid, x, y))
 
 def win_pos(wid, x=None, y=None):
-	if x is None or y is None:
-		out = xdo('getwindowgeometry %s' % wid)
-		match = re.search(r'Position: (\d*,\d*)', out)
-		if not match:
-			return None
-		return map(int, match.group(1).split(','))
-	else:
-		xdo('windowmove %s %s %s' % (wid, x, y))
+    if x is None or y is None:
+        out = xdo('getwindowgeometry %s' % wid)
+        match = re.search(r'Position: (\-?\d*,\-?\d*)', out)
+        if not match:
+            return None
+        return map(int, match.group(1).split(','))
+    else:
+        xdo('windowmove %s %s %s' % (wid, x, y))
 
 def win_screen(wid):
 	out = xdo('getwindowgeometry %s' % wid)

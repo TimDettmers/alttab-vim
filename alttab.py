@@ -22,6 +22,7 @@ def uden():
         if pos is None: continue
         if 'unity' in name: continue
         if 'Desktop' in name: continue
+        if pos[0] < 0 or pos[1] < 0: continue # todo: handle windows on other desktops
         centerx = (pos[0]+size[0])-(size[0]/2)
         centery = (pos[1]+size[1])-(size[1]/2)
         p = [centerx, centery]
@@ -29,9 +30,7 @@ def uden():
         key2wid[scan_codes[i]] = wid
         widgets[-1].show()
         wid2data[wid] = [name, pos, size]
-        print [wid, name]
     app.exec_()
-    print KeyEvent.key
 
     focus(key2wid[KeyEvent.key])
 
