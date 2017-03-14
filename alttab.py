@@ -8,8 +8,8 @@ from winlaunch import *
 class KeyEvent:
     key = None
 
-keys = 'jfkdlshga;ut'
-scan_codes = [74, 70, 75, 68, 76, 83, 72, 71, 65, 59, 85, 84]
+keys = 'jfkdlshga;utrei'
+scan_codes = [74, 70, 75, 68, 76, 83, 72, 71, 65, 59, 85, 84, 82, 69, 73]
 
 def uden():
     app = QtGui.QApplication(sys.argv)
