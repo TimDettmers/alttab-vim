@@ -2,8 +2,37 @@ import keyboard
 import sys
 from PyQt4 import QtGui, QtCore
 from winlaunch import *
-
+from threading import Thread
+import time
+import copy
 # Press PAGE UP then PAGE DOWN to type "foobar".
+
+class WindowPoller(Thread):
+    def __init__(self):
+        super(WindowPoller, self).__init__()
+        daemon = True
+        self.widget_params = []
+
+    def run(self):
+        while True:
+            wids = current_windows()
+            widgets = []
+            key2wid = {}
+            new_widget_params = []
+            for i, wid in enumerate(wids):
+                pos, size, name = win_pos(wid), win_size(wid), win_name(wid)
+                if 'alttab.py' == name: continue
+                if pos is None: continue
+                if 'unity' in name: continue
+                if 'Desktop' in name: continue
+                if pos[0] < 0 or pos[1] < 0: continue # todo: handle windows on other desktops
+                centerx = (pos[0]+size[0])-(size[0]/2)
+                centery = (pos[1]+size[1])-(size[1]/2)
+                p = [centerx, centery]
+                new_widget_params.append([centerx, centery, keys[i], wid, scan_codes[i]])
+            print(len(new_widget_params))
+            self.widget_params = new_widget_params
+            time.sleep(2.0)
 
 class KeyEvent:
     key = None
@@ -11,25 +40,20 @@ class KeyEvent:
 keys = 'jfkdlshga;utrei'
 scan_codes = [74, 70, 75, 68, 76, 83, 72, 71, 65, 59, 85, 84, 82, 69, 73]
 
+p = WindowPoller()
+p.start()
+
 def uden():
     app = QtGui.QApplication(sys.argv)
-    wids = current_windows()
+    params = copy.deepcopy(p.widget_params)
+    print(len(params))
     widgets = []
     key2wid = {}
-    wid2data = {}
-    for i, wid in enumerate(wids):
-        pos, size, name = win_pos(wid), win_size(wid), win_name(wid)
-        if pos is None: continue
-        if 'unity' in name: continue
-        if 'Desktop' in name: continue
-        if pos[0] < 0 or pos[1] < 0: continue # todo: handle windows on other desktops
-        centerx = (pos[0]+size[0])-(size[0]/2)
-        centery = (pos[1]+size[1])-(size[1]/2)
-        p = [centerx, centery]
-        widgets.append(mymainwindow(centerx, centery, keys[i]))
-        key2wid[scan_codes[i]] = wid
+    for x, y, key, wid, scan_code in params:
+        widgets.append(mymainwindow(x, y, key))
+        key2wid[scan_code] = wid
         widgets[-1].show()
-        wid2data[wid] = [name, pos, size]
+
     app.exec_()
 
     focus(key2wid[KeyEvent.key])
