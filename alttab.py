@@ -52,8 +52,8 @@ class WindowPoller(Thread):
 class KeyEvent:
     key = None
 
-keys = 'jfkdlshga;utrei'
-scan_codes = [74, 70, 75, 68, 76, 83, 72, 71, 65, 59, 85, 84, 82, 69, 73]
+keys = 'jfkdlshga;utreiwopmnvb'
+scan_codes = [74, 70, 75, 68, 76, 83, 72, 71, 65, 59, 85, 84, 82, 69, 73, 87,79,80,77,78,86,66]
 
 p = WindowPoller()
 p.start()
@@ -71,6 +71,7 @@ def uden():
 
     app.exec_()
 
+    print(KeyEvent.key)
     focus(key2wid[KeyEvent.key])
 
 
