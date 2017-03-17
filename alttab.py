@@ -14,13 +14,26 @@ class WindowPoller(Thread):
         self.widget_params = []
 
     def run(self):
+        error = False
         while True:
-            wids = current_windows()
+            error = False
+            try:
+                wids = current_windows()
+            except:
+                print('ERROR')
+                time.sleep(0.1)
+                continue
+
             widgets = []
             key2wid = {}
             new_widget_params = []
             for i, wid in enumerate(wids):
-                pos, size, name = win_pos(wid), win_size(wid), win_name(wid)
+                try:
+                    pos, size, name = win_pos(wid), win_size(wid), win_name(wid)
+                except:
+                    print("ERROR")
+                    error = True
+                    break
                 if 'alttab.py' == name: continue
                 if pos is None: continue
                 if 'unity' in name: continue
@@ -30,9 +43,11 @@ class WindowPoller(Thread):
                 centery = (pos[1]+size[1])-(size[1]/2)
                 p = [centerx, centery]
                 new_widget_params.append([centerx, centery, keys[i], wid, scan_codes[i]])
-            print(len(new_widget_params))
+            if error:
+                time.sleep(0.1)
+                continue
             self.widget_params = new_widget_params
-            time.sleep(2.0)
+            time.sleep(0.1)
 
 class KeyEvent:
     key = None
