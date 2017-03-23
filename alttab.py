@@ -1,21 +1,43 @@
+from __future__ import print_function
 import keyboard
 import sys
 from PyQt4 import QtGui, QtCore
 from winlaunch import *
-from threading import Thread
+from threading import Thread, Event
 import time
 import copy
+from util import Timer
 # Press PAGE UP then PAGE DOWN to type "foobar".
+
+t = Timer()
 
 class WindowPoller(Thread):
     def __init__(self):
         super(WindowPoller, self).__init__()
         daemon = True
         self.widget_params = []
+        updating = False
+        self.stop_updating = Event()
+
+
+    def key_event_start(self):
+        self.stop_updating.set()
+
+    def key_event_stop(self):
+        self.stop_updating.clear()
+
+    def is_in_key_event(self):
+        return self.stop_updating.isSet()
+
 
     def run(self):
         error = False
+        i = 0
+        t0 = time.time()
         while True:
+            i+=1
+            if i % 100 == 0:
+                print(i, time.time() - t0)
             error = False
             try:
                 wids = current_windows()
@@ -29,6 +51,7 @@ class WindowPoller(Thread):
             new_widget_params = []
             for i, wid in enumerate(wids):
                 try:
+                    if self.is_in_key_event(): break
                     pos, size, name = win_pos(wid), win_size(wid), win_name(wid)
                 except:
                     print("ERROR")
@@ -39,6 +62,7 @@ class WindowPoller(Thread):
                 if 'unity' in name: continue
                 if 'Desktop' in name: continue
                 if pos[0] < 0 or pos[1] < 0: continue # todo: handle windows on other desktops
+                if size is None: continue
                 centerx = (pos[0]+size[0])-(size[0]/2)
                 centery = (pos[1]+size[1])-(size[1]/2)
                 p = [centerx, centery]
@@ -59,20 +83,30 @@ p = WindowPoller()
 p.start()
 
 def uden():
+    t.tick('full')
     app = QtGui.QApplication(sys.argv)
     params = copy.deepcopy(p.widget_params)
+    p.key_event_start()
     print(len(params))
     widgets = []
     key2wid = {}
+    t.tick('generate windows')
     for x, y, key, wid, scan_code in params:
         widgets.append(mymainwindow(x, y, key))
         key2wid[scan_code] = wid
         widgets[-1].show()
+    t.tock('generate windows')
 
+    t.tick('exec app')
     app.exec_()
+    t.tock('exec app')
 
     print(KeyEvent.key)
+    t.tick('focus')
     focus(key2wid[KeyEvent.key])
+    t.tock('focus')
+    t.tock('full')
+    p.key_event_stop()
 
 
 
