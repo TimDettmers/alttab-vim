@@ -94,16 +94,19 @@ def uden():
     for x, y, key, wid, scan_code in params:
         widgets.append(mymainwindow(x, y, key))
         key2wid[scan_code] = wid
+        t.tick('show windows')
         widgets[-1].show()
+        t.tick('show windows')
     t.tock('generate windows')
+    t.tock('show windows')
 
     t.tick('exec app')
     app.exec_()
     t.tock('exec app')
 
-    print(KeyEvent.key)
     t.tick('focus')
-    focus(key2wid[KeyEvent.key])
+    if KeyEvent.key in key2wid:
+        focus(key2wid[KeyEvent.key])
     t.tock('focus')
     t.tock('full')
     p.key_event_stop()
@@ -113,14 +116,13 @@ def uden():
 
 class mymainwindow(QtGui.QLabel):
     def __init__(self, x, y, text):
-        QtGui.QMainWindow.__init__(self)
+        QtGui.QWidget.__init__(self)
         self.setWindowFlags(
             QtCore.Qt.WindowStaysOnTopHint |
             QtCore.Qt.FramelessWindowHint
             )
         #self.setLineWrapMode(QtGui.QTextEdit.FixedPixelWidth)
-        self.move(x,y)
-        self.resize(40,40)
+        self.setGeometry(x,y, 40,40)
         font = self.font()
         font.setFamily("Courier")
         font.setPointSize(20)

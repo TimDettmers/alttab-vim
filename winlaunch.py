@@ -83,23 +83,11 @@ def xdo(do):
         print('ERROR: %s' % err)
         print('Command: {0}'.format(do))
         wid = do.split(' ')[1]
-        print('windows: {0}'.format(current_windows()))
     return out
 
 def win_pid(wid):
 	''' Gives the PID of the process that window belongs to '''
 	return xdo('getwindowpid %s' % wid).strip()
-
-#def current_windows():
-#    ''' Gives a list with all open windows '''
-#    out, err = get_cmd_output('xprop -root')
-#    match = re.search(r'_NET_CLIENT_LIST_STACKING\(WINDOW\): window id # (.*)', out)
-#    if not match:
-#        return None
-#    print(match.group(1).split(', '))
-#    current_windows2()
-#    return match.group(1).split(', ')
-
 
 def current_windows():
     out, err = get_cmd_output('wmctrl -l')
