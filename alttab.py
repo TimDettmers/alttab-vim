@@ -88,6 +88,8 @@ def uden():
     params = copy.deepcopy(p.widget_params)
     p.key_event_start()
     print(len(params))
+    p.key_event_stop()
+    if len(params) == 0: return
     widgets = []
     key2wid = {}
     t.tick('generate windows')

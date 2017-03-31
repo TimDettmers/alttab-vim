@@ -23,6 +23,7 @@ class Timer(object):
 
     def tock(self, name='default'):
         self.tick(name)
+        if name not in self.cumulative_secs: return 0.0
         value = self.cumulative_secs[name]
         if not self.silent:
             print('Time taken for {0}: {1:.4f}s'.format(name, value))
