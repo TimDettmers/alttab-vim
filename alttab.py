@@ -7,9 +7,22 @@ from threading import Thread, Event
 import time
 import copy
 from util import Timer
+import itertools
 # Press PAGE UP then PAGE DOWN to type "foobar".
 
 t = Timer()
+
+num_multi_keys = 1
+keys = [key for key in 'jfkdlshga;utreiwop']
+scan_codes = [74, 70, 75, 68, 76, 83, 72, 71, 65, 59, 85, 84, 82, 69, 73, 87,79,80]
+main_keys = keys[:num_multi_keys]
+secondary_keys = keys[num_multi_keys:]
+main_codes = scan_codes[:num_multi_keys]
+secondary_codes = scan_codes[num_multi_keys:]
+multi_keys = [r for r in itertools.product(main_keys, secondary_keys)]
+multi_codes = [r for r in itertools.product(main_codes, secondary_codes)]
+keys = keys[num_multi_keys:] + multi_keys
+scan_codes = scan_codes[num_multi_keys:] + multi_codes
 
 class WindowPoller(Thread):
     def __init__(self):
@@ -74,10 +87,28 @@ class WindowPoller(Thread):
             time.sleep(0.1)
 
 class KeyEvent:
-    key = None
+    key2wid = None
+    key1 = None
+    key2 = None
 
-keys = 'jfkdlshga;utreiwopmnvb'
-scan_codes = [74, 70, 75, 68, 76, 83, 72, 71, 65, 59, 85, 84, 82, 69, 73, 87,79,80,77,78,86,66]
+    @staticmethod
+    def add_key(key):
+        if key in KeyEvent.key2wid:
+            KeyEvent.key1 = key
+            QtGui.qApp.quit()
+        else:
+            if KeyEvent.key1 is None:
+                KeyEvent.key1 = key
+            else:
+                KeyEvent.key2 = key
+                QtGui.qApp.quit()
+
+
+
+
+
+
+nested_keys = []
 
 p = WindowPoller()
 p.start()
@@ -87,9 +118,9 @@ def uden():
     app = QtGui.QApplication(sys.argv)
     params = copy.deepcopy(p.widget_params)
     p.key_event_start()
-    print(len(params))
-    p.key_event_stop()
-    if len(params) == 0: return
+    if len(params) == 0:
+        p.key_event_stop()
+        return
     widgets = []
     key2wid = {}
     t.tick('generate windows')
@@ -102,15 +133,19 @@ def uden():
     t.tock('generate windows')
     t.tock('show windows')
 
+    KeyEvent.key2wid = key2wid
     t.tick('exec app')
     app.exec_()
     t.tock('exec app')
 
-    t.tick('focus')
-    if KeyEvent.key in key2wid:
-        focus(key2wid[KeyEvent.key])
-    t.tock('focus')
+    if KeyEvent.key1 in key2wid:
+        focus(key2wid[KeyEvent.key1])
+    if (KeyEvent.key1, KeyEvent.key2) in key2wid:
+        focus(key2wid[(KeyEvent.key1, KeyEvent.key2)])
     t.tock('full')
+
+    KeyEvent.key1 = None
+    KeyEvent.key2 = None
     p.key_event_stop()
 
 
@@ -136,8 +171,15 @@ class mymainwindow(QtGui.QLabel):
         self.setPalette(P)
 
         self.setFont(font)
+        if isinstance(text, tuple):
+            text = "".join(text)
+            self.num_keys = 2
+        else:
+            self.num_keys = 1
         self.setText(text)
         self.setAlignment(QtCore.Qt.AlignCenter)
+        self.num_key_events = 0
+        self.text = text
 
 
         #QtCore.QTimer.singleShot(300, self.close)
@@ -148,16 +190,13 @@ class mymainwindow(QtGui.QLabel):
         centerPoint = QtGui.QApplication.desktop().screenGeometry(screen).center()
         frameGm.moveCenter(centerPoint)
         centerPoint = QtCore.QPoint(centerPoint.x()+self.offset, centerPoint.y())
-        print(centerPoint)
         self.move(centerPoint)
 
     def mousePressEvent(self, event):
         QtGui.qApp.quit()
 
     def keyPressEvent(self, e):
-        #if e.key() == QtCore.Qt.Key_Q:
-        KeyEvent.key = e.key()
-        QtGui.qApp.quit()
+        KeyEvent.add_key(e.key())
 
 
 
