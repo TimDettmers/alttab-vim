@@ -12,9 +12,9 @@ import itertools
 
 t = Timer()
 
-num_multi_keys = 1
-keys = [key for key in 'jfkdlshga;utreiwop']
-scan_codes = [74, 70, 75, 68, 76, 83, 72, 71, 65, 59, 85, 84, 82, 69, 73, 87,79,80]
+num_multi_keys = 2
+keys = [key for key in 'jkfdlshga;utreiwop']
+scan_codes = [74, 75, 70, 68, 76, 83, 72, 71, 65, 59, 85, 84, 82, 69, 73, 87,79,80]
 main_keys = keys[:num_multi_keys]
 secondary_keys = keys[num_multi_keys:]
 main_codes = scan_codes[:num_multi_keys]
