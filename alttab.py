@@ -50,7 +50,7 @@ class WindowPoller(Thread):
         while True:
             i+=1
             if i % 100 == 0:
-                print(i, time.time() - t0)
+                print('Processed {0} polls in {1} seconds ({2} seconds of waiting)'.format(i, time.time() - t0, 0.1*i))
             error = False
             try:
                 wids = current_windows()
@@ -62,7 +62,7 @@ class WindowPoller(Thread):
             widgets = []
             key2wid = {}
             new_widget_params = []
-            for i, wid in enumerate(wids):
+            for j, wid in enumerate(wids):
                 try:
                     if self.is_in_key_event(): break
                     pos, size, name = win_pos(wid), win_size(wid), win_name(wid)
@@ -79,7 +79,7 @@ class WindowPoller(Thread):
                 centerx = (pos[0]+size[0])-(size[0]/2)
                 centery = (pos[1]+size[1])-(size[1]/2)
                 p = [centerx, centery]
-                new_widget_params.append([centerx, centery, keys[i], wid, scan_codes[i]])
+                new_widget_params.append([centerx, centery, keys[j], wid, scan_codes[j]])
             if error:
                 time.sleep(0.1)
                 continue
@@ -110,10 +110,7 @@ class KeyEvent:
 
 nested_keys = []
 
-p = WindowPoller()
-p.start()
-
-def uden():
+def handle_key_event():
     t.tick('full')
     app = QtGui.QApplication(sys.argv)
     params = copy.deepcopy(p.widget_params)
@@ -200,6 +197,7 @@ class mymainwindow(QtGui.QLabel):
 
 
 
-
-keyboard.add_hotkey('ctrl+alt+k', uden)
+p = WindowPoller()
+p.start()
+keyboard.add_hotkey('ctrl+alt+k', handle_key_event)
 keyboard.wait()
