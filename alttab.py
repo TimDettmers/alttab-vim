@@ -24,6 +24,8 @@ multi_codes = [r for r in itertools.product(main_codes, secondary_codes)]
 keys = keys[num_multi_keys:] + multi_keys
 scan_codes = scan_codes[num_multi_keys:] + multi_codes
 
+polling_interval = 0.5
+
 class WindowPoller(Thread):
     def __init__(self):
         super(WindowPoller, self).__init__()
@@ -56,7 +58,7 @@ class WindowPoller(Thread):
                 wids = current_windows()
             except:
                 print('ERROR')
-                time.sleep(0.1)
+                time.sleep(polling_interval)
                 continue
 
             widgets = []
@@ -81,10 +83,10 @@ class WindowPoller(Thread):
                 p = [centerx, centery]
                 new_widget_params.append([centerx, centery, keys[j], wid, scan_codes[j]])
             if error:
-                time.sleep(0.1)
+                time.sleep(polling_interval)
                 continue
             self.widget_params = new_widget_params
-            time.sleep(0.1)
+            time.sleep(polling_interval)
 
 class KeyEvent:
     key2wid = None
